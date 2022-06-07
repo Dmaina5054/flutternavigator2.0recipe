@@ -31,6 +31,7 @@ class ProfileManager extends ChangeNotifier {
   }
 
   void tapOnProfile(bool selected) {
+    print('ayayaas');
     _didSelectUser = selected;
     notifyListeners();
   }

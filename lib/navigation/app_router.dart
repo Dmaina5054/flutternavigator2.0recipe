@@ -51,11 +51,35 @@ class AppRouter extends RouterDelegate
         //Add
         if (appStateManager.isLoggedIn && !appStateManager.isOnboardingComplete)
           OnboardingScreen.page(),
-        //TODO: Add Home
-        //TODO: Add Create new Item
-        //TODO: Add SelectGroceryItem
-        //TODO: Add Profile Screen
-        //TODO: Add WebView Screen
+        // Add Home
+        if (appStateManager.isOnboardingComplete)
+          Home.page(appStateManager.getSelectedTab),
+        //Add Create new Item
+        if (groceryManager.isCreatingNewItem)
+          GroceryItemScreen.page(onCreate: (item) {
+            groceryManager.addItem(item);
+          }, onUpdate: (item, index) {
+            //no need to update since new item
+          }),
+        //: Add SelectGroceryItem
+
+        if (groceryManager.selectedIndex != -1)
+// 2
+          GroceryItemScreen.page(
+              item: groceryManager.selectedGroceryItem,
+              index: groceryManager.selectedIndex,
+              onUpdate: (item, index) {
+// 3
+                groceryManager.updateItem(item, index);
+              },
+              onCreate: (_) {
+// 4 No create
+              }),
+        //: Add Profile Screen
+        if (profileManager.didSelectUser)
+          ProfileScreen.page(profileManager.getUser),
+        //Add WebView Screen
+        if (profileManager.didTapOnRaywenderlich) WebViewScreen.page()
       ],
     );
   }
@@ -64,10 +88,21 @@ class AppRouter extends RouterDelegate
     if (!route.didPop(result)) {
       return false;
     }
-    //TODO: Handle Onboarding and splash
-    //TODO: Handle State when user closes grocery item
-    //TODO: Handle State when user closes the profile screen
-    //TODO: Handle State when user closes WebView screen
+    //Handle Onboarding and splash
+    if (route.settings.name == FooderlichPages.onboardingPath) {
+      appStateManager.logout();
+    }
+    // Handle State when user closes grocery item
+    if (route.settings.name == FooderlichPages.groceryItemDetails) {
+      groceryManager.groceryItemTapped(-1);
+    }
+    //Handle State when user closes the profile screen
+    if (profileManager.didSelectUser)
+      ProfileScreen(user: profileManager.getUser);
+    //Handle State when user closes WebView screen
+    if (route.settings.name == FooderlichPages.raywenderlich) {
+      profileManager.tapOnRaywenderlich(false);
+    }
 
     return true;
   }
